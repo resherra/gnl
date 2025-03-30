@@ -1,16 +1,16 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   get_next_line.c                                    :+:      :+:    :+:   */
+/*   get_next_line_bonus.c                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: recherra <recherra@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/01/27 12:22:17 by recherra          #+#    #+#             */
-/*   Updated: 2024/02/22 11:55:27 by recherra         ###   ########.fr       */
+/*   Created: 2024/02/12 12:14:10 by recherra          #+#    #+#             */
+/*   Updated: 2024/02/22 11:55:47 by recherra         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "get_next_line.h"
+#include "get_next_line_bonus.h"
 
 static char	*freed(char **str)
 {
@@ -55,27 +55,27 @@ static void	initial(t_utils *utils)
 char	*get_next_line(int fd)
 {
 	t_utils		utils;
-	static char	*line;
+	static char	*line[OPEN_MAX];
 
 	initial(&utils);
 	if (BUFFER_SIZE <= 0 || (read(fd, utils.buffer, 0)) < 0)
-		return (freed(&line));
+		return (freed(&line[fd]));
 	utils.buffer = malloc(BUFFER_SIZE + 1);
 	if (!utils.buffer)
-		return (freed(&line));
+		return (freed(&line[fd]));
 	while (utils.readed == BUFFER_SIZE && utils.truncated == -1)
 	{
 		utils.readed = read(fd, utils.buffer, BUFFER_SIZE);
 		utils.buffer[utils.readed] = '\0';
-		utils.tmp = line;
-		line = ft_strjoin(line, utils.buffer);
+		utils.tmp = line[fd];
+		line[fd] = ft_strjoin(line[fd], utils.buffer);
 		freed(&utils.tmp);
-		utils.truncated = ft_trunc(line);
+		utils.truncated = ft_trunc(line[fd]);
 	}
 	freed(&utils.buffer);
 	if (utils.truncated == -1)
-		return (utils.tmp = last_line(&line));
+		return (utils.tmp = last_line(&line[fd]));
 	else
-		utils.next_line = ne_line(&line, utils.truncated);
+		utils.next_line = ne_line(&line[fd], utils.truncated);
 	return (utils.next_line);
 }
